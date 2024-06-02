@@ -10,9 +10,11 @@ import {
   EmailVerificationSchema,
 } from "mongo/schema/email-verification/email-verify.schema";
 import { EmailVerificationService } from "./email-verification.service";
+import { ProfileModule } from "src/profile/profile.module";
 
 @Module({
   imports: [
+    ProfileModule,
     MongooseModule.forFeature([
       UserFeatureModel,
       { name: EmailVerification.name, schema: EmailVerificationSchema },

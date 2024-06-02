@@ -10,11 +10,13 @@ import { EmailVerificationService } from "./email-verification.service";
 import { SignupDto } from "./dto/auth.dto";
 import { InjectModel } from "@nestjs/mongoose";
 import { User, UserDocument } from "mongo/schema/user.schema";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { randomBytes } from "crypto";
+import { Profile, ProfileDocument } from "mongo/schema/profile/profile.schema";
+import { ProfileService } from "src/profile/profile.service";
 
 interface JwtPayload {
-  userId: string;
+  userId: Types.ObjectId;
 }
 
 @Injectable()
@@ -24,6 +26,7 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly emailVerificationService: EmailVerificationService,
     private readonly jwtService: JwtService,
+    private readonly profileService: ProfileService,
   ) {}
 
   async signup(data: SignupDto): Promise<{ success: boolean; email: string }> {
@@ -47,14 +50,18 @@ export class AuthService {
       const verificationCode = Math.floor(
         100000 + Math.random() * 900000,
       ).toString();
-      await this.emailService.sendVerificationEmail(
-        data.email,
-        verificationCode,
-      );
+      // await this.emailService.sendVerificationEmail(
+      // data.email,
+      // verificationCode,
+      // );
+      console.log(verificationCode);
+
       await this.emailVerificationService.generateVerificationCode(
         newUser.id,
         verificationCode,
+        data.email,
       );
+
       return { success: true, email: data.email };
     } catch (error) {
       throw error;
@@ -63,12 +70,12 @@ export class AuthService {
   private createUniqueUsername(name: string): string {
     const baseUsername = name.startsWith("@") ? name : `@${name}`;
     const uniqueId = randomBytes(4).toString("hex");
-    return `${baseUsername}-${uniqueId}`;
+    return `${baseUsername.toLocaleLowerCase()}-${uniqueId}`;
   }
   async signin(
     email: string,
     password: string,
-  ): Promise<{ token: string; message: string }> {
+  ): Promise<{ token: string; message: string; profile?: Profile }> {
     try {
       const user = await this.userModel.findOne({ email });
 
@@ -82,16 +89,40 @@ export class AuthService {
 
       const token = await this.generateToken(user.id);
       // await this.saveToken(user.id, token, { days: 3 });
+      const profile = await this.profileService.findProfileByUserId(user.id);
 
-      return { token, message: "Login successful" };
+      return { token, message: "Login successful", profile };
     } catch (error) {
       throw error;
     }
   }
 
-  private async generateToken(userId: string): Promise<string> {
+  private generateToken(userId: Types.ObjectId): string {
     const payload: JwtPayload = { userId };
     return this.jwtService.sign(payload, { secret: process.env.JWT_SECRET });
+  }
+  async handleEmailVerification(email: string, code: string) {
+    const isVerified = await this.emailVerificationService.verifyEmail(
+      email,
+      code,
+    );
+    if (!isVerified.success) {
+      return {
+        success: false,
+        message: "invalid code",
+      };
+    }
+    await this.profileService.createProfile(
+      {
+        displayname: isVerified.name,
+      },
+      isVerified.userId,
+    );
+    return {
+      success: true,
+      message: "Email Verified Successfully",
+      token: this.generateToken(isVerified.userId),
+    };
   }
 
   // private async blacklistTokens(userId: string): Promise<void> {

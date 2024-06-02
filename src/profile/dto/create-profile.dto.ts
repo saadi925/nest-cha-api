@@ -4,7 +4,7 @@ export class CreateProfileDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  displayName?: string;
+  displayname?: string;
 
   @IsOptional()
   @IsString()
@@ -23,6 +23,6 @@ export class CreateProfileDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(100)
-  profileDescription?: string;
+  @MaxLength(200)
+  about?: string;
 }

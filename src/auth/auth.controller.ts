@@ -22,10 +22,10 @@ export class AuthController {
   @Put("email-verification")
   async verifyEmail(@Body() verificationData: any) {
     const { email, code } = verificationData;
-    const isVerified = await this.emailVerificationService.verifyEmail(
+    const isVerified = await this.authService.handleEmailVerification(
       email,
       code,
     );
-    return { verified: isVerified };
+    return isVerified;
   }
 }

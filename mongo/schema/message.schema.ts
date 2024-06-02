@@ -21,7 +21,8 @@ export class Message extends Document {
 
   @Prop({ type: String })
   mediaUrl?: string;
-
+  @Prop({ type: String, default : false })
+  seen: boolean;
   @Prop({ type: String })
   thumbnailUrl?: string;
 }

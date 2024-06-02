@@ -4,6 +4,7 @@ import { ProfileController } from "./profile.controller";
 import { MongooseModule } from "@nestjs/mongoose";
 import { Profile, ProfileSchema } from "mongo/schema/profile/profile.schema";
 import { UserModule } from "src/user/user.module";
+import { ConversationModule } from "src/conversation/conversation.module";
 
 @Module({
   imports: [
@@ -14,8 +15,10 @@ import { UserModule } from "src/user/user.module";
       },
     ]),
     UserModule,
+    ConversationModule,
   ],
   controllers: [ProfileController],
   providers: [ProfileService],
+  exports: [ProfileService],
 })
 export class ProfileModule {}

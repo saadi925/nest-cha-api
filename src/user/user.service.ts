@@ -29,11 +29,23 @@ export class UserService {
     const user = await this.userModel.findOne({ username }).select("id").lean();
     if (!user) {
       throw new NotFoundException(
-        `User with the username ${username} not found`
+        `User with the username ${username} not found`,
       );
     }
     return user._id as Types.ObjectId;
   }
+  async findUserByUsername(username: string): Promise<UserDocument> {
+    const user = await this.userModel
+      .findOne({ username })
+      .select("-password -email -groups -friends");
+    if (!user) {
+      throw new NotFoundException(
+        `User with the username ${username} not found`,
+      );
+    }
+    return user;
+  }
+
   async setVerified(userId: Types.ObjectId) {
     await this.userModel.updateOne({ _id: userId }, { verified: true });
   }

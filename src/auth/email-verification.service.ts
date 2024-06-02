@@ -4,7 +4,7 @@ import {
   EmailVerificationDocument,
 } from "mongo/schema/email-verification/email-verify.schema";
 import { User, UserDocument } from "mongo/schema/user.schema";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
 
 @Injectable()
@@ -18,23 +18,36 @@ export class EmailVerificationService {
   async generateVerificationCode(
     userId: string,
     verificationCode: string,
+    email: string,
   ): Promise<string> {
     await this.emailVerifyModel.create({
       user: userId,
       code: verificationCode,
+      email: email,
     });
 
     return verificationCode;
   }
 
-  async verifyEmail(email: string, verificationCode: string): Promise<boolean> {
-    const emailVerification = await this.emailVerifyModel.findOne({
-      email,
-      code: verificationCode,
-    });
+  async verifyEmail(
+    email: string,
+    verificationCode: string,
+  ): Promise<{
+    success: boolean;
+    userId?: Types.ObjectId;
+    name?: string;
+  }> {
+    const emailVerification = await this.emailVerifyModel
+      .findOne({
+        email,
+        code: verificationCode,
+      })
+      .exec();
 
     if (!emailVerification) {
-      return false;
+      return {
+        success: false,
+      };
     }
 
     await this.userModel.updateOne(
@@ -46,7 +59,14 @@ export class EmailVerificationService {
       email,
       code: verificationCode,
     });
+    const user = await this.userModel.findById(emailVerification.user).exec();
+    console.log("user found", user);
 
-    return true;
+    const userId = emailVerification.user;
+    return {
+      success: true,
+      userId,
+      name: user.name,
+    };
   }
 }

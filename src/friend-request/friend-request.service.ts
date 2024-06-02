@@ -20,7 +20,7 @@ export class FriendRequestService {
     @InjectModel(FriendRequest.name)
     private friendRequestModel: Model<FriendRequestDocument>,
     private userService: UserService,
-    private conversationService : ConversationService
+    private conversationService: ConversationService,
   ) {}
 
   async create(
@@ -52,7 +52,7 @@ export class FriendRequestService {
   }
 
   async getAllReceivedRequests(userId: string): Promise<FriendRequest[]> {
-    return this.friendRequestModel
+    return await this.friendRequestModel
       .find({ senderId: userId })
       .populate("recieverId")
       .exec();
@@ -75,18 +75,22 @@ export class FriendRequestService {
       .deleteOne({ senderId: userId, receiverId: targetUserId })
       .exec();
   }
-  async acceptFriendRequest(username : string , userId : Types.ObjectId){
+  async acceptFriendRequest(username: string, userId: Types.ObjectId) {
     const targetUserId = await this.userService.findUserIdByUsername(username);
     if (!targetUserId) {
       throw new NotFoundException(`User with username ${username} not found`);
     }
-    const filterQuery = {senderId : userId, receiverId : targetUserId}
-    const request = await this.friendRequestModel.findOneAndUpdate(filterQuery, {
-      status :$FriendRequestStatus.ACCEPTED
-    })
-     await this.conversationService.create({ participants :[userId, targetUserId]})    
+    const filterQuery = { senderId: userId, receiverId: targetUserId };
+    const request = await this.friendRequestModel.findOneAndUpdate(
+      filterQuery,
+      {
+        status: $FriendRequestStatus.ACCEPTED,
+      },
+    );
+    await this.conversationService.create({
+      participants: [userId, targetUserId],
+    });
 
-    return request
+    return request;
   }
-
 }

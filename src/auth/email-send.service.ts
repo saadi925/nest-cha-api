@@ -23,7 +23,7 @@ export class EmailService {
       from: process.env.G_KEY,
       to: email,
       subject: "ecommerce Email Verification",
-      text: `Your verification code for ecommerce Email Verification is: ${verificationCode}`,
+      text: `Your verification code for Sliko Email Verification is: ${verificationCode}`,
     };
 
     const res = await this.transporter.sendMail(mailOptions);

@@ -7,12 +7,12 @@ export type ProfileDocument = Profile & Document;
 @Schema({ timestamps: true })
 export class Profile extends Document {
   @Prop({ type: String })
-  displayName?: string;
+  displayname?: string;
 
   @Prop({ type: String })
   bio?: string;
 
-  @Prop({ type: String })
+  @Prop({ type: String , default : null})
   avatar?: string;
   
   
@@ -24,7 +24,7 @@ export class Profile extends Document {
   organization?: string;
 
   @Prop({ type: String })
-  profileDescription?: string;
+  about?: string;
 
   @Prop({ type: Types.ObjectId, ref: User.name, required: true })
   userId: Types.ObjectId;
