@@ -10,18 +10,29 @@ import {
   EmailVerificationSchema,
 } from "mongo/schema/email-verification/email-verify.schema";
 import { EmailVerificationService } from "./email-verification.service";
-import { ProfileModule } from "src/profile/profile.module";
+// import { GoogleStrategy } from "src/google-auth/google-auth.strategy";
+import { PassportModule } from "@nestjs/passport";
+import { TokenService } from "./token.service";
+import { JwtStrategy } from ".";
 
 @Module({
   imports: [
-    ProfileModule,
+    PassportModule,
     MongooseModule.forFeature([
       UserFeatureModel,
       { name: EmailVerification.name, schema: EmailVerificationSchema },
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, EmailService, JwtService, EmailVerificationService],
+  providers: [
+    AuthService, 
+    EmailService,
+    // ,GoogleStrategy,
+    JwtService, 
+    EmailVerificationService,
+    TokenService,
+    JwtStrategy
+  ],
   exports: [AuthService, EmailVerificationService],
 })
 export class AuthModule {}

@@ -49,4 +49,7 @@ export class UserService {
   async setVerified(userId: Types.ObjectId) {
     await this.userModel.updateOne({ _id: userId }, { verified: true });
   }
+  async findUserProfiles(page : number, pageSize : number) {
+    
+  }
 }

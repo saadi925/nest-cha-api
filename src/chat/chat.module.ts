@@ -6,7 +6,6 @@ import { ConversationFeatureModel } from "../../mongo/schema/conversation.schema
 import { MessageFeatureModel } from "../../mongo/schema/message.schema";
 import { JwtService } from "@nestjs/jwt";
 import { UserFeatureModel } from "mongo/schema/user.schema";
-import { ChatController } from "./chat.controller";
 
 @Module({
   imports: [
@@ -17,6 +16,5 @@ import { ChatController } from "./chat.controller";
     ]),
   ],
   providers: [ChatGateway, ChatService, JwtService],
-  controllers: [ChatController],
 })
 export class ChatModule {}

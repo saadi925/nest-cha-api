@@ -7,7 +7,6 @@ import {
   ProfileDocument,
 } from "../../mongo/schema/profile/profile.schema";
 import { UserService } from "src/user/user.service";
-import { ConversationService } from "src/conversation/conversation.service";
 import {  MultipartFile } from "@fastify/multipart";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
@@ -20,7 +19,6 @@ export class ProfileService {
     
     @InjectModel(Profile.name) private profileModel: Model<ProfileDocument>,
     private userService: UserService,
-    private conversationService: ConversationService,
   ) {
       if (!existsSync(this.basePath)) {
         mkdirSync(this.basePath, { recursive: true });
@@ -71,16 +69,11 @@ export class ProfileService {
     const user = await this.userService.findUserByUsername(username);
 
     let profile = await this.profileModel.findOne({ userId: user._id }).exec();
-    const conversation =
-      await this.conversationService.findOrCreateConversation(
-        currentUser,
-        user._id as Types.ObjectId,
-      );
+  
 
     return {
       ...profile.toJSON(),
       username: username,
-      conversationId: conversation._id as Types.ObjectId,
     };
   }
   async getUserProfile(userId: string) {
@@ -99,67 +92,61 @@ export class ProfileService {
     return this.profileModel.findByIdAndDelete(id).exec();
   }
 
-  async toggleOnline(userId: string): Promise<boolean> {
-    const profile = await this.profileModel.findOne({ user: userId }).exec();
-    profile.isOnline = !profile.isOnline;
-    const newp = await profile.save();
-    return newp.isOnline || false;
-  }
   async findProfileByUserId(userId: string): Promise<Profile> {
     return this.profileModel.findOne({ user: userId }).exec();
   }
 
-  async getUserProfiles(
-    page: number,
-    pageSize: number,
-    userId: Types.ObjectId,
-  ) {
-    const skip = (page - 1) * pageSize;
+  // async getUserProfiles(
+  //   page: number,
+  //   pageSize: number,
+  //   userId: Types.ObjectId,
+  // ) {
+  //   const skip = (page - 1) * pageSize;
 
-    const profiles = await this.profileModel.aggregate([
-      {
-        $match: {
-          userId: { $ne: userId },
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "userDetails",
-        },
-      },
-      {
-        $unwind: "$userDetails",
-      },
-      {
-        $project: {
-          displayName: 1,
-          bio: 1,
-          avatar: 1,
-          isOnline: 1,
-          organization: 1,
-          profileDescription: 1,
-          username: "$userDetails.username",
-          name: "$userDetails.name",
-        },
-      },
-      { $skip: skip },
-      { $limit: pageSize },
-    ]);
+  //   const profiles = await this.profileModel.aggregate([
+  //     {
+  //       $match: {
+  //         userId: { $ne: userId },
+  //       },
+  //     },
+  //     {
+  //       $lookup: {
+  //         from: "users",
+  //         localField: "userId",
+  //         foreignField: "_id",
+  //         as: "userDetails",
+  //       },
+  //     },
+  //     {
+  //       $unwind: "$userDetails",
+  //     },
+  //     {
+  //       $project: {
+  //         displayName: 1,
+  //         bio: 1,
+  //         avatar: 1,
+  //         isOnline: 1,
+  //         organization: 1,
+  //         profileDescription: 1,
+  //         username: "$userDetails.username",
+  //         name: "$userDetails.name",
+  //       },
+  //     },
+  //     { $skip: skip },
+  //     { $limit: pageSize },
+  //   ]);
 
-    const totalProfiles = await this.profileModel.countDocuments({
-      userId: { $ne: userId },
-    });
-    const totalPages = Math.ceil(totalProfiles / pageSize);
+  //   const totalProfiles = await this.profileModel.countDocuments({
+  //     userId: { $ne: userId },
+  //   });
+  //   const totalPages = Math.ceil(totalProfiles / pageSize);
 
-    return {
-      profiles,
-      currentPage: page,
-      totalPages,
-      totalProfiles,
-    };
-  }
+  //   return {
+  //     profiles,
+  //     currentPage: page,
+  //     totalPages,
+  //     totalProfiles,
+  //   };
+  // }
   
 }

@@ -7,14 +7,12 @@ import {
   OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  WebSocketServerOptions,
   WsException,
 } from "@nestjs/websockets";
 import { ChatService } from "./chat.service";
 import { Model, Types } from "mongoose";
 import { SocketWithUser } from "./ws.guard";
 import { CreateMessageDto } from "./chat.dto";
-import { Socket } from "socket.io";
 import { JwtService } from "@nestjs/jwt";
 import { Server } from "http";
 import { User, UserDocument } from "mongo/schema/user.schema";

@@ -6,8 +6,8 @@ export class CreateMessageDto {
   content: string;
 
   senderId: Types.ObjectId;
-
-  conversationId?: Types.ObjectId;
+  @IsString()
+  conversationId: Types.ObjectId;
   @IsOptional()
   @IsString()
   mediaType?: "audio" | "image" | "video" | "file";
@@ -17,6 +17,4 @@ export class CreateMessageDto {
   @IsOptional()
   @IsString()
   thumbnailUrl?: string;
-
-  username?: string;
 }

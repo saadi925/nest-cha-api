@@ -34,8 +34,7 @@ export class EmailVerificationService {
     verificationCode: string,
   ): Promise<{
     success: boolean;
-    userId?: Types.ObjectId;
-    name?: string;
+    user?  : User
   }> {
     const emailVerification = await this.emailVerifyModel
       .findOne({
@@ -43,30 +42,23 @@ export class EmailVerificationService {
         code: verificationCode,
       })
       .exec();
-
     if (!emailVerification) {
       return {
         success: false,
       };
     }
-
     await this.userModel.updateOne(
       { _id: emailVerification.user },
       { verified: true },
     );
-
     await this.emailVerifyModel.deleteOne({
       email,
       code: verificationCode,
     });
     const user = await this.userModel.findById(emailVerification.user).exec();
-    console.log("user found", user);
-
-    const userId = emailVerification.user;
     return {
       success: true,
-      userId,
-      name: user.name,
+       user
     };
   }
 }

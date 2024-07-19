@@ -14,10 +14,12 @@ export class Conversation extends Document {
 
   @Prop({ type: Date, default: Date.now })
   lastMessageAt: Date;
-  
 
   @Prop({ type: [Types.ObjectId], ref: 'Message', default : [] })
   messages: Types.ObjectId[];
+
+  @Prop({type : String})
+  lastMessage : string
 }
 
 export const ConversationSchema = SchemaFactory.createForClass(Conversation);

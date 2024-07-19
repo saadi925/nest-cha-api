@@ -45,7 +45,7 @@ export class ProfileController {
     const userId = req.user._id as Types.ObjectId;
 console.log("getting profiles");
 
-    return await this.profileService.getUserProfiles(page, pageSize, userId);
+    // return await this.profileService.getUserProfiles(page, pageSize, userId);
   }
   
   @Post('avatar') 
@@ -58,7 +58,7 @@ console.log("getting profiles");
     const file = await req.file()
     const filePath = await this.profileService.uploadAvatar(userId,  file)
     
-    return { url : filePath }
+    reply.send({ url : filePath })
     
     
     
@@ -96,12 +96,7 @@ console.log("getting profiles");
   async remove(@Param("id") id: string): Promise<Profile> {
     return await this.profileService.deleteProfile(id);
   }
-  @Put("toggleOnline")
-  @UseGuards(JwtAuthGuard)
-  async toggleOnline(@Req() req: RequestWithUser): Promise<boolean> {
-    const userId = req.user?.id as string;
-    return await this.profileService.toggleOnline(userId);
-  }
+
 
 
   

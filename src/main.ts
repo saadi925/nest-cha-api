@@ -9,15 +9,18 @@ import compression from "@fastify/compress";
 import { constants } from "zlib";
 import { ValidationPipe } from "@nestjs/common";
 import { RedisIoAdapter } from "./redis/redis.adapter";
-import * as fastifyMultipart from '@fastify/multipart';
+import * as fastifyMultipart from "@fastify/multipart";
+
+import { FastifyReplyExpress, FastifyRequestExpress } from "./types/Requests";
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter(),
+    new FastifyAdapter({ bodyLimit: 1004857})
   );
   app.enableCors({
     origin: "*",
   });
+
   const ws = new RedisIoAdapter(app);
   await ws.connectToRedis();
   app.useWebSocketAdapter(ws);
@@ -32,11 +35,13 @@ async function bootstrap() {
       sameSite: "lax",
     },
   });
-  await app.register(fastifyMultipart)
+  await app.register(fastifyMultipart);
   await app.register(compression, {
     brotliOptions: { params: { [constants.BROTLI_PARAM_QUALITY]: 4 } },
     encodings: ["gzip", "deflate"],
   });
+  console.log("Server is running on port 5000");
+  
   await app.listen(process.env.PORT || 5000);
 }
 bootstrap();

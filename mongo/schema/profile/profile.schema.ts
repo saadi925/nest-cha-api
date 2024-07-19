@@ -6,18 +6,11 @@ export type ProfileDocument = Profile & Document;
 
 @Schema({ timestamps: true })
 export class Profile extends Document {
-  @Prop({ type: String })
-  displayname?: string;
+
 
   @Prop({ type: String })
   bio?: string;
 
-  @Prop({ type: String , default : null})
-  avatar?: string;
-  
-  
-  @Prop({ type: Boolean, default : false  })
-  isOnline : boolean;
   
   
   @Prop({ type: String })
@@ -26,7 +19,7 @@ export class Profile extends Document {
   @Prop({ type: String })
   about?: string;
 
-  @Prop({ type: Types.ObjectId, ref: User.name, required: true })
+  @Prop({ type: Types.ObjectId, ref: "User", required: true })
   userId: Types.ObjectId;
 }
 

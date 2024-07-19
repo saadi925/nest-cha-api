@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { PassportStrategy } from "@nestjs/passport";
 import { User, UserDocument } from "mongo/schema/user.schema";
@@ -16,15 +16,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     @InjectModel(User.name) private readonly user: Model<UserDocument>,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest:  ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: process.env.JWT_SECRET,
     });
   }
-
   async validate(payload: JwtPayload) {
     const { userId } = payload;
 
-    const user = await this.user.findById(userId).select("-password");
+    const user = await this.user.findById(userId).select("-password -groups -friends ");
     if (!user) {
       throw new UnauthorizedException("User not found");
     }
@@ -32,7 +31,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (payload.exp && payload.exp < now) {
       throw new UnauthorizedException("Token expired");
     }
-
+  console.log("user logged in", user ? true : false);
+  
     return user;
   }
 }
